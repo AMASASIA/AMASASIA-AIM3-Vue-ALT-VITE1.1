@@ -4,34 +4,38 @@ const translations = {
     en: {
         title: "Ask Me Anything",
         ask: "Tap the Tive to start a comunicate. I can discovery the web, find places, or save your Memo and Notebook.",
-        askModel: "Ask {model} anything",
+        askModel: "Ask Tive◎AI anything",
         discovery: "Discovery",
         map: "AI Map",
         memo: "Memo",
         notebook: "Notebook",
         thinking: "Thinking..",
-        history: "Back",
+        history: "History",
         settings: "Settings",
         language: "Language",
         appearance: "Appearance",
         modelChoice: "AI Model",
-        cognitive: "Synchronizing Cognitive Assets"
+        cognitive: "Synchronizing Cognitive Assets",
+        saveNotebook: "Save to Notebook",
+        oke: "OKE"
     },
     ja: {
         title: "Ask Me Anything",
         ask: "Tiveをタップして会話を始めましょう。ウェブの探索、場所の検索、メモやノートブックの保存が可能です。",
-        askModel: "{model}に質問してみましょう",
+        askModel: "Tive◎AIに質問してみましょう",
         discovery: "Discovery",
         map: "AIマップ",
         memo: "メモ",
         notebook: "ノートブック",
         thinking: "思考中..",
-        history: "戻る",
+        history: "履歴",
         settings: "設定",
         language: "言語",
         appearance: "外観",
         modelChoice: "AIモデル",
-        cognitive: "認知資産を同期中"
+        cognitive: "認知資産を同期中",
+        saveNotebook: "ノートブックに保存",
+        oke: "OKE"
     }
 };
 

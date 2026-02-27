@@ -62,6 +62,24 @@ onMounted(() => {
 watch(messages, (newVal) => localStorage.setItem('amas_messages_v4', JSON.stringify(newVal)), { deep: true });
 watch(notebookEntries, (newVal) => localStorage.setItem('amas_notebook_v2', JSON.stringify(newVal)), { deep: true });
 
+// Keyboard Shortcut Ctrl+A
+const handleKeyDown = (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+        e.preventDefault();
+        activeView.value = 'result';
+        isResultThinking.value = false;
+    }
+};
+
+onMounted(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    // ... rest of mount logic
+});
+
+onUnmounted(() => {
+    window.removeEventListener('keydown', handleKeyDown);
+});
+
 // Login handler
 const handleAnchor = async (id, session) => {
   isInitializing.value = true;
@@ -77,6 +95,13 @@ const handleAnchor = async (id, session) => {
 
 // Messaging logic
 const handleSendMessage = async (text) => {
+  // @amas trigger
+  if (text.toLowerCase().includes('@amas')) {
+    activeView.value = 'result';
+    isResultThinking.value = false;
+    return;
+  }
+
   messages.value.push({
     id: Date.now().toString(),
     role: 'user',
@@ -144,6 +169,14 @@ const handleToggleVoice = async () => {
 };
 
 const handleVoiceTranscription = async (transcript) => {
+    // AMAS trigger in voice
+    const amasKeywords = ["amas", "アマス", "あます", "アマスる"];
+    if (amasKeywords.some(kw => transcript.toLowerCase().includes(kw))) {
+        activeView.value = 'result';
+        isResultThinking.value = false;
+        return;
+    }
+
     const processingId = 'proc-' + Date.now();
     notebookEntries.value.unshift({ id: processingId, type: 'voice_memo', title: 'Thinking...', content: transcript, timestamp: new Date(), isProcessing: true });
     
@@ -174,6 +207,19 @@ const handleManualDiaryEntry = (content) => {
     content,
     timestamp: new Date()
   });
+};
+
+const handleSaveToNotebook = (content) => {
+    if (!content) return;
+    const entry = {
+        id: Date.now().toString(),
+        type: 'standard',
+        title: `AI Response ${new Date().toLocaleTimeString()}`,
+        content: content,
+        timestamp: new Date()
+    };
+    notebookEntries.value.unshift(entry);
+    notify('Notebook', 'Saved to Notebook', 'success');
 };
 </script>
 
@@ -211,13 +257,20 @@ const handleManualDiaryEntry = (content) => {
         :content="resultContent"
         :isThinking="isResultThinking"
         @close="activeView = 'dashboard'"
-        @save="activeView = 'notebook'"
-        @oke="activeView = 'dashboard'"
+        @save="(content) => { 
+          handleSaveToNotebook(content);
+          activeView = 'notebook'; 
+        }"
+        @oke="(content) => {
+          handleSaveToNotebook(content);
+          activeView = 'dashboard';
+        }"
         @submit="(data) => { 
           isResultThinking = true; 
           resultContent = ''; 
           handleSendMessage(data.prompt); 
         }"
+        @toggle-voice="handleToggleVoice"
       />
 
     </main>

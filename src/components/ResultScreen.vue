@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { Share2, Book, Check, PenTool, X, Trash2, ArrowLeft, Plus, Mic, Square, Menu, LayoutDashboard, Copy } from 'lucide-vue-next';
+import { Share2, Book, Check, PenTool, X, Trash2, ArrowLeft, Plus, Mic, Square, Menu, LayoutDashboard, Copy, Zap } from 'lucide-vue-next';
 import { i18n, theme } from '../services/i18n';
 
 const props = defineProps({
@@ -14,6 +14,9 @@ const isSigning = ref(false);
 const isOke = ref(false);
 const selectedModel = ref('Gemini'); 
 const promptInput = ref('');
+const processingState = ref('idle'); // idle, proofing, sending, completed
+const userWallet = ref(localStorage.getItem('tive_wallet_address') || '');
+const zkpProof = ref(null);
 
 // Canvas Logic
 const canvasRef = ref(null);
@@ -88,6 +91,36 @@ const handlePromptSubmit = () => {
     if (!promptInput.value.trim()) return;
     emit('submit', { prompt: promptInput.value, model: selectedModel.value });
     promptInput.value = '';
+};
+
+// --- OKE / ZKP FLOW ---
+const handleAmaneMint = async (target) => {
+    if (processingState.value !== 'idle') return;
+    
+    processingState.value = 'proofing';
+    try {
+        // 1. ZKP Generation
+        // In a real flow, we'd call ZkpService.generateIdentityProof
+        // For the demo, we simulate a small delay
+        await new Promise(r => setTimeout(r, 2000));
+        
+        processingState.value = 'sending';
+        // 2. AA Transaction (Atomic Mint)
+        // Simulate AA Bundler processing
+        await new Promise(r => setTimeout(r, 3000));
+        
+        processingState.value = 'completed';
+        
+        setTimeout(() => {
+            if (target === 'save') emit('save', props.content);
+            else emit('oke', props.content);
+            processingState.value = 'idle';
+        }, 1000);
+
+    } catch (e) {
+        console.error("Amane Flow failed", e);
+        processingState.value = 'idle';
+    }
 };
 </script>
 
@@ -199,12 +232,38 @@ const handlePromptSubmit = () => {
     <div class="absolute bottom-12 w-full max-w-2xl px-8 flex flex-col items-center gap-8">
         
         <div v-if="!isThinking" class="flex items-center gap-6 animate-in fade-in zoom-in duration-500">
-            <button @click="$emit('oke')" class="w-16 h-16 rounded-3xl bg-emerald-500 text-white flex items-center justify-center shadow-lg active:scale-95 transition-all">
-                <Check :size="28" stroke-width="3" />
+            <button 
+                @click="handleAmaneMint('oke')" 
+                :disabled="processingState !== 'idle'"
+                class="w-16 h-16 rounded-3xl bg-emerald-500 text-white flex items-center justify-center shadow-lg active:scale-95 transition-all disabled:opacity-50 relative overflow-hidden"
+            >
+                <Check v-if="processingState === 'idle' || processingState === 'completed'" :size="28" stroke-width="3" />
+                <div v-else class="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                
+                <!-- Status Overlay (Progressive) -->
+                <div v-if="processingState === 'proofing'" class="absolute inset-0 bg-emerald-600 flex items-center justify-center">
+                    <Zap :size="20" class="animate-pulse" />
+                </div>
+                <div v-if="processingState === 'sending'" class="absolute inset-0 bg-blue-600 flex items-center justify-center">
+                    <Share2 :size="20" class="animate-bounce" />
+                </div>
             </button>
-            <button @click="$emit('save')" class="w-48 h-16 rounded-3xl bg-white text-black text-[10px] font-black uppercase tracking-[0.4em] shadow-xl active:scale-95 transition-all border border-black/5">
-                {{ i18n.t('notebook') }}
-            </button>
+
+            <div class="flex flex-col items-center">
+                <button 
+                    @click="handleAmaneMint('save')" 
+                    :disabled="processingState !== 'idle'"
+                    class="w-48 h-16 rounded-3xl bg-white text-black text-[10px] font-black uppercase tracking-[0.4em] shadow-xl active:scale-95 transition-all border border-black/5 disabled:opacity-50"
+                >
+                    <span v-if="processingState === 'idle'">{{ i18n.t('notebook') }}</span>
+                    <span v-else-if="processingState === 'proofing'">ZKP PROOFING..</span>
+                    <span v-else-if="processingState === 'sending'">SECRET MINTING..</span>
+                    <span v-else-if="processingState === 'completed'">COMPLETED!</span>
+                </button>
+                <p v-if="processingState !== 'idle'" class="mt-2 text-[8px] font-black uppercase tracking-widest text-emerald-500 animate-pulse">
+                    {{ processingState === 'proofing' ? 'Generating Proof' : 'Executing Atomic Mint' }}
+                </p>
+            </div>
         </div>
 
         <!-- Dynamic Prompt Input -->
