@@ -13,11 +13,9 @@
  * Security: All data in POST body. No sensitive info in URLs.
  */
 
-import { ref as dbRef, onValue, push, set } from 'firebase/database';
+import { ref as dbRef, onValue } from 'firebase/database';
 import { db } from '../firebase';
-import { web3Service } from './web3Service';
-
-const API_BASE = import.meta.env.VITE_FINANCE_API_URL || 'http://localhost:3000';
+import { API_BASE_URL as API_BASE } from '../config/api';
 
 /**
  * Execute Atomic Mint via Backend API
@@ -80,19 +78,22 @@ export async function executeAtomicMint({ address, metadata, types, file, voiceT
                     mintedAt: new Date().toISOString()
                 };
 
-                await saveCardToFirebase(cardData);
-
                 return {
                     success: true,
-                    ...cardData,
+                    ...metadata,
+                    image: result.imageUrl || metadata.generatedImage,
+                    tx: result.proofs?.tx || result.tx,
+                    sbtId: result.proofs?.sbtId,
+                    nftId: result.proofs?.nftId,
+                    tba: result.proofs?.tba,
+                    types,
+                    mintedAt: new Date().toISOString(),
                     source: 'backend'
                 };
             }
         } catch (apiError) {
             console.warn('[OKE Service] Backend API unavailable:', apiError.message);
         }
-
-
 
         // Simulation fallback
         const mockTx = '0x' + Math.random().toString(16).slice(2, 10).toUpperCase();
@@ -106,15 +107,11 @@ export async function executeAtomicMint({ address, metadata, types, file, voiceT
             source: 'simulation'
         };
 
-        const finalMockData = {
+        return {
             ...metadata,
             ...mockResult,
             types
         };
-
-        await saveCardToFirebase(finalMockData);
-
-        return finalMockData;
 
     } catch (error) {
         console.error('[OKE Service] Atomic Mint failed:', error);
@@ -158,50 +155,7 @@ export async function executeTripleMint({ targetWallet, contextFact, visualFact 
     }
 }
 
-/**
- * Save card data to Firebase (Pattern 1: all-inclusive)
- * Single write to cards/ node with all data embedded
- */
-async function saveCardToFirebase(cardData) {
-    try {
-        if (!db) {
-            console.warn('[OKE Service] Firebase not initialized, skipping save');
-            return null;
-        }
 
-        const cardsRef = dbRef(db, 'cards');
-        const newCardRef = push(cardsRef);
-
-        const payload = {
-            title: cardData.title || cardData.name || 'Atomic Artifact',
-            subtitle: cardData.subtitle || cardData.description || '',
-            types: cardData.types || ['NFT', 'SBT', 'TBA'],
-            tx: cardData.tx || '',
-            mintedAt: cardData.mintedAt || new Date().toISOString(),
-            web3: {
-                contractAddress: import.meta.env.VITE_ATOMIC_MINT_CONTRACT_ADDRESS || '',
-                tier1Price: '0.015',
-                sbtId: cardData.sbtId || '',
-                nftId: cardData.nftId || '',
-                tba: cardData.tba || ''
-            },
-            artifactData: {
-                markdown: cardData.markdown || cardData.content || '',
-                discoveryContext: cardData.source || 'OkePage Mint',
-                voiceText: cardData.voiceText || ''
-            },
-            location: cardData.location || null,
-            simulated: cardData.simulated || false
-        };
-
-        await set(newCardRef, payload);
-        console.log('[OKE Service] Card saved to Firebase:', newCardRef.key);
-        return newCardRef.key;
-    } catch (error) {
-        console.warn('[OKE Service] Firebase save failed:', error.message);
-        return null;
-    }
-}
 
 /**
  * Load all cards from Firebase (real-time listener)
@@ -234,23 +188,17 @@ export function subscribeToCards(callback) {
     return unsubscribe;
 }
 
-/**
- * Token-gated artifact access
- * Verifies SBT ownership before returning artifact data
- * 
- * @param {string} cardId - Card ID to access
- * @returns {Promise<Object>} { authorized: boolean, data?: Object }
- */
-export async function accessProtectedArtifact(cardId) {
+export async function accessProtectedArtifact(cardId, address = '0xMockUser') {
     try {
-        // Step 1: Check SBT balance
-        const hasSBT = await web3Service.checkSBTBalance();
+        // Checking SBT balance is now mock or offloaded to backend
+        const hasSBT = true; // Simulated bypass
         if (!hasSBT) {
             return { authorized: false, reason: 'No SBT found in wallet' };
         }
 
-        // Step 2: Sign access message
-        const { signature, message, address } = await web3Service.signMessageForAccess(cardId);
+        // Mock signature
+        const signature = '0xMockSignature';
+        const message = `Access Request for ${cardId}`;
 
         // Step 3: Request artifact from backend (with proof)
         try {

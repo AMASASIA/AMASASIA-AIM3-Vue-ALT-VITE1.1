@@ -5,9 +5,7 @@
  * The wrapper function that calls the Backend atomicMint API.
  */
 
-// Configure your backend URL here. 
-// In development, it's likely http://localhost:3000
-const API_BASE_URL = "";
+import { API_BASE_URL } from '../config/api.js';
 
 export async function atomicMint({
     address,

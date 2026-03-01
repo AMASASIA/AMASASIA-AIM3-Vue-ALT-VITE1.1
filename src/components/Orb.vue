@@ -7,19 +7,19 @@ const props = defineProps({
   intensity: { type: Number, default: 0 }
 });
 
-const canvasRef = ref(null);
-const bars = ref(Array.from({ length: 12 }, () => ({ h: 5, targetH: 5 })));
+const bars = ref(Array.from({ length: 32 }, () => ({ h: 8, targetH: 8 })));
 let animationFrame;
 
 const animate = () => {
     if (props.isListening) {
         bars.value.forEach(bar => {
-            bar.targetH = 15 + Math.random() * 50;
-            bar.h += (bar.targetH - bar.h) * 0.2;
+            bar.targetH = 10 + Math.random() * 80;
+            bar.h += (bar.targetH - bar.h) * 0.3;
         });
     } else {
         bars.value.forEach(bar => {
-            bar.h += (5 - bar.h) * 0.1;
+            const idle = 8 + Math.sin(Date.now() / 1000 + bars.value.indexOf(bar)) * 3;
+            bar.h += (idle - bar.h) * 0.1;
         });
     }
     animationFrame = requestAnimationFrame(animate);
@@ -31,42 +31,37 @@ onUnmounted(() => cancelAnimationFrame(animationFrame));
 
 <template>
   <div class="orb-container" :class="{ 'is-listening': isListening, 'is-processing': isProcessing }">
-    <div class="outer-ring" :class="{ 'is-speaking': isProcessing }"></div>
+    <!-- Sacred Halo -->
+    <div class="sacred-halo" :class="{ 'is-active': isListening || isProcessing }"></div>
     
-    <div class="orb-core">
-      <!-- Mist Layers -->
-      <div class="mist layer-1"></div>
-      <div class="mist layer-2"></div>
+    <div class="orb-core glass-vessel">
+      <!-- Mist / Soul Smoke -->
+      <div class="mist-layer rose-glow"></div>
+      <div class="mist-layer gold-glow"></div>
       
-      <!-- Dynamic Oscillating Bars (The "Movement") -->
-      <div v-if="isListening" class="visualizer-bars relative">
+      <!-- Neural Visualizer Blocks -->
+      <div v-if="isListening" class="visualizer-shards">
           <div 
             v-for="(bar, i) in bars" 
             :key="i" 
-            class="v-bar" 
+            class="soul-shard" 
             :style="{ 
                 height: bar.h + 'px',
-                width: '8px',
-                opacity: 0.6 + (bar.h / 100)
+                opacity: 0.3 + (bar.h / 80)
             }"
           ></div>
-          <!-- Stop Indicator (Square) -->
-          <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div class="stop-indicator w-10 h-10 backdrop-blur-xl rounded-2xl flex items-center justify-center">
-                  <div class="stop-square w-3 h-3 rounded-sm opacity-80"></div>
-              </div>
-          </div>
       </div>
 
-      <!-- Tive Center Dot -->
-      <div v-else class="tive-dot"></div>
-
-      <div class="core-light"></div>
+      <!-- Living Center Dot -->
+      <div v-else class="heart-dot">
+          <div class="dot-core"></div>
+          <div class="dot-pulse"></div>
+      </div>
     </div>
 
-    <!-- UI Feedback Wave -->
-    <div v-if="isListening" class="listening-wave">
-      <div v-for="i in 3" :key="i" class="wave"></div>
+    <!-- Ripples of Intent -->
+    <div v-if="isListening" class="intent-ripples">
+      <div v-for="i in 3" :key="i" class="ripple"></div>
     </div>
   </div>
 </template>
@@ -74,158 +69,79 @@ onUnmounted(() => cancelAnimationFrame(animationFrame));
 <style scoped>
 .orb-container {
   position: relative;
-  width: 320px;
-  height: 320px;
+  width: 340px;
+  height: 340px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
 }
 
-.outer-ring {
+.sacred-halo {
   position: absolute;
-  width: 380px;
-  height: 380px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
-  border: 4px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 0 60px rgba(255, 255, 255, 0.2);
-  opacity: 0.6;
-  animation: ring-pulse 6s infinite ease-in-out;
+  border: 1px solid rgba(255, 215, 0, 0.1);
+  box-shadow: 0 0 40px rgba(255, 139, 139, 0.05);
+  animation: halo-float 8s infinite alternate ease-in-out;
+}
+.sacred-halo.is-active {
+    border-color: rgba(255, 215, 0, 0.4);
+    box-shadow: 0 0 80px rgba(255, 215, 0, 0.2);
+    animation: rotate 10s infinite linear;
 }
 
-.outer-ring.is-speaking {
-    animation: ring-pulse-fast 1s infinite ease-in-out;
-    border-width: 8px;
-    opacity: 1;
-}
-
-@keyframes ring-pulse-fast {
-  0%, 100% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.1); opacity: 1; filter: brightness(1.5); }
-}
-
-.light-mode .outer-ring {
-    border-color: rgba(0, 0, 0, 0.9);
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.15);
-    opacity: 1;
-}
+@keyframes halo-float { from { scale: 0.95; opacity: 0.3; } to { scale: 1.05; opacity: 0.6; } }
+@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 .orb-core {
   position: relative;
-  width: 260px;
-  height: 260px;
-  background: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000 100%);
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle at 40% 40%, rgba(30, 20, 20, 0.8) 0%, #000 100%);
   border-radius: 50%;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.5s ease;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
 }
 
-.light-mode .orb-core {
-    background: #ffffff;
-    border-color: rgba(0, 0, 0, 0.1);
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
-    opacity: 1;
+.visualizer-shards { display: flex; align-items: center; gap: 4px; z-index: 10; }
+.soul-shard {
+    width: 6px;
+    background: linear-gradient(to bottom, #FF8B8B, #FFD700);
+    border-radius: 100px;
+    box-shadow: 0 0 20px rgba(255, 139, 139, 0.4);
 }
 
-.visualizer-bars {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    z-index: 20;
+.heart-dot { position: relative; width: 14px; height: 14px; z-index: 20; }
+.dot-core { position: absolute; inset: 0; background: #FFD700; border-radius: 50%; box-shadow: 0 0 15px #FFD700; z-index: 2; }
+.dot-pulse { 
+    position: absolute; inset: -4px; border: 1px solid #FF8B8B; border-radius: 50%; 
+    animation: ping-sacred 2s infinite cubic-bezier(0, 0, 0.2, 1); 
 }
 
-.v-bar {
-    background: white;
-    border-radius: 4px;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-    transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+@keyframes ping-sacred { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3.5); opacity: 0; } }
+
+.mist-layer { position: absolute; inset: -50%; filter: blur(60px); opacity: 0.2; }
+.rose-glow { background: radial-gradient(circle, #FF8B8B 0%, transparent 60%); animation: drift 15s infinite linear; }
+.gold-glow { background: radial-gradient(circle, #FFD700 0%, transparent 60%); animation: drift 20s infinite linear reverse; }
+
+@keyframes drift { from { transform: rotate(0deg) translate(10%, 10%); } to { transform: rotate(360deg) translate(-10%, -10%); } }
+
+.intent-ripples { position: absolute; inset: -40px; pointer-events: none; }
+.ripple { 
+    position: absolute; inset: 0; border: 1px solid rgba(255, 215, 0, 0.3); 
+    border-radius: 50%; animation: ripple-spread 3s infinite; 
 }
+.ripple:nth-child(2) { animation-delay: 1s; }
+.ripple:nth-child(3) { animation-delay: 2s; }
 
-.light-mode .v-bar {
-    background: #000;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
-}
-
-.stop-indicator {
-    background: rgba(255,255,255,0.15);
-    border: 1px solid rgba(255,255,255,0.2);
-    backdrop-filter: blur(10px);
-}
-.light-mode .stop-indicator {
-    background: rgba(0,0,0,0.05);
-    border-color: rgba(0,0,0,0.1);
-}
-.stop-square { background: white; }
-.light-mode .stop-square { background: black; }
-
-.tive-dot {
-  width: 12px;
-  height: 12px;
-  background: white;
-  border-radius: 50%;
-  z-index: 10;
-  box-shadow: 0 0 15px white;
-  animation: dot-breathe 4s infinite ease-in-out;
-}
-
-.light-mode .tive-dot {
-    background: black;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-}
-
-.mist {
-  position: absolute;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
-  filter: blur(40px);
-}
-
-.light-mode .mist {
-    background: radial-gradient(circle at center, rgba(0, 0, 0, 0.08) 0%, transparent 70%);
-    opacity: 0.6;
-}
-
-.layer-1 { animation: mist-float 15s infinite linear; }
-.layer-2 { animation: mist-float 20s infinite linear reverse; }
-
-@keyframes dot-breathe {
-  0%, 100% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.4); opacity: 1; }
-}
-
-@keyframes mist-float {
-  0% { transform: translate(-25%, -25%) rotate(0deg); }
-  100% { transform: translate(-25%, -25%) rotate(360deg); }
-}
-
-@keyframes ring-pulse {
-  0%, 100% { transform: scale(1); opacity: 0.6; }
-  50% { transform: scale(1.05); opacity: 0.8; }
-}
-
-.listening-wave {
-  position: absolute;
-  width: 400px;
-  height: 400px;
-}
-
-.wave {
-  position: absolute;
-  inset: 0;
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  animation: wave-spread 3s infinite linear;
-}
-
-.light-mode .wave { border-color: rgba(0, 0, 0, 0.5); border-width: 6px; }
-
-@keyframes wave-spread {
-  0% { transform: scale(0.8); opacity: 0.8; }
-  100% { transform: scale(1.5); opacity: 0; }
+@keyframes ripple-spread {
+    0% { transform: scale(0.6); opacity: 0.8; }
+    100% { transform: scale(1.4); opacity: 0; }
 }
 </style>

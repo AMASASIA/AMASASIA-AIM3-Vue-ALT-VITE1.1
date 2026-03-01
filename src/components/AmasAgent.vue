@@ -120,29 +120,52 @@ const startListening = () => {
 
 const simulateAIProcess = async (text) => {
   transcript.value = text;
-  status.value = 'AI Orchestrating...';
+  status.value = 'Tive Orchestrating...';
+  addLog(`Input: "${text}"`, 'ai');
   
-  setTimeout(async () => {
-    if (text.includes('繋いで') || text.includes('call')) {
-      addLog(`Intent: Video Call`, 'ai');
-      await executeTool('start_call', { target: 'Alice' });
-    } else {
-      addLog(`Intent: Add Schedule`, 'ai');
-      await executeTool('add_schedule', {
-        date: '2026-02-23',
-        title: 'AI会議',
-        tag: '#milestone'
-      });
-      // 自動記録
-      await executeTool('mint_achievement', {
-        content: 'Scheduled AI Meeting on 2026-02-23',
-        category: 'Productivity'
-      });
-    }
+  try {
+    const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+    const res = await fetch(`${API_URL}/agent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            prompt: text,
+            sessionId: 'amas-agent-session'
+        })
+    });
     
-    status.value = 'Task Completed';
+    const data = await res.json();
+    
+    if (data.status === 'success') {
+        const response = data.response;
+        
+        // Handle potential tool calls encoded in the response or meta
+        // For this implementation, we assume the backend might return a structured response
+        // if it needs to trigger a tool. 
+        // Logic: Search for keywords if the backend hasn't moved to full tool-use protocol yet.
+        
+        if (text.includes('繋いで') || text.includes('call') || response.includes('call')) {
+          addLog(`Action: Initiating Video Call`, 'call');
+          await executeTool('start_call', { target: 'Alice' });
+        } else if (text.includes('スケジュール') || text.includes('calendar') || response.includes('schedule')) {
+          addLog(`Action: Updating Timeline`, 'success');
+          await executeTool('add_schedule', {
+            date: new Date().toISOString().split('T')[0],
+            title: 'AI Scheduled Meeting',
+            tag: '#automated'
+          });
+        }
+        
+        addLog(`Tive: ${response.substring(0, 40)}...`, 'ai');
+        status.value = 'Task Handled';
+    }
+  } catch (e) {
+    console.error("AI Bridge Error:", e);
+    addLog("Bridge Offline (Logic Fallback)", "error");
+    status.value = 'Offline';
+  } finally {
     isListening.value = false;
-  }, 1500);
+  }
 };
 // 外部から起動できるように公開
 defineExpose({

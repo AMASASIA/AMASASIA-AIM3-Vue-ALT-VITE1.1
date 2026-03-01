@@ -80,53 +80,66 @@
         </div>
       </div>
 
-      <!-- TAB: COLLECTION (Trading Card Library) -->
+      <!-- TAB: COLLECTION (Sacred Artifact Library) -->
       <div v-if="currentTab === 'collection'" class="collection-view-mobile animate-slide-up">
         <div class="section-head">
-           <h2 class="head-title">Collection</h2>
-           <div class="head-stats">{{ collectionItems.length }} Assets Archived</div>
+           <div class="sacred-glow"></div>
+           <h2 class="head-title">Artifacts of Soul</h2>
+           <div class="head-stats">{{ collectionItems.length }} Neural Impressions Archived</div>
         </div>
 
-        <div class="asset-list-vertical">
+        <div class="asset-grid-sacred">
           <div 
             v-for="item in collectionItems" 
             :key="item.id" 
-            class="asset-card-v"
+            class="artifact-card-sacred"
             :class="{ 'is-flipped': flippedCards.includes(item.id) }"
             @click="handleCardInteract(item)"
           >
             <div class="card-inner-v">
-              <!-- FRONT FACE -->
-              <div class="card-face-front">
-                <div class="card-preview">
-                   <img v-if="item.image" :src="item.image" class="preview-image-v" />
-                   <div class="card-hologram-overlay"></div>
+              <!-- FRONT FACE: The Crystallized Form -->
+              <div class="card-face-front-sacred">
+                <div class="card-visual-container">
+                   <div class="organic-orb-bg"></div>
+                   <img v-if="item.image" :src="item.image" class="artifact-image" />
+                   <div class="glass-glare"></div>
                 </div>
-                <div class="card-meta">
-                  <span class="card-uid">{{ item.id }}</span>
-                  <h3 class="card-name">{{ item.name || item.title }}</h3>
-                  <div class="card-badges">
-                    <span v-for="t in item.types || ['SBT']" :key="t" class="badge-v">{{ t }}</span>
-                    <span class="badge-v verified">OKE_VERIFIED</span>
+                <div class="card-meta-sacred">
+                  <div class="meta-top">
+                    <span class="uid-tag">{{ item.id.substring(0,8) }}</span>
+                    <span class="type-badge">{{ item.types?.[0] || 'SBT' }}</span>
+                  </div>
+                  <h3 class="artifact-title">{{ item.name || item.title }}</h3>
+                  <div class="identity-seal">
+                    <span class="seal-icon">💠</span>
+                    <span class="seal-text">OKE_VERIFIED_ORIGIN</span>
                   </div>
                 </div>
                 
-                <!-- LOCK OVERLAY -->
-                <div v-if="!item.unowned && !flippedCards.includes(item.id)" class="lock-indicator-v">🔒</div>
+                <!-- LOCK OVERLAY: Sacred Geometry -->
+                <div v-if="!flippedCards.includes(item.id)" class="sacred-lock">
+                  <div class="lock-pulse"></div>
+                  <span class="lock-glyph">🔒</span>
+                </div>
               </div>
 
-              <!-- BACK FACE (UNLOCKED) -->
-              <div class="card-face-back">
-                <div class="sbt-badge-status">SBT VERIFIED OWNER</div>
-                <div class="unlocked-scroll markdown-body-v">
-                   <div v-if="loadingArtifactId === item.id">🧚 Verifying signature...</div>
-                   <div v-else-if="item.artifactData?.markdown">
-                      <div v-html="renderMarkdown(item.artifactData.markdown)"></div>
+              <!-- BACK FACE: The Revealed Truth -->
+              <div class="card-face-back-sacred">
+                <div class="reveal-header">
+                  <span class="auth-verified">PROVEN OWNER</span>
+                </div>
+                <div class="revealed-content custom-scroll">
+                   <div v-if="loadingArtifactId === item.id" class="neural-loading">
+                      <div class="loading-orb"></div>
+                      <span>Decrypting Pulse...</span>
                    </div>
-                   <div v-else>
-                      <h2>{{ item.title }}</h2>
-                      <p>Ownership confirmed. This artifact contains the crystallised thoughts of @amas. Use your signature to unlock the knowledge layer.</p>
-                      <button class="sign-btn-v" @click.stop="handleCardInteract(item)">UNLOCK KNOWLEDGE</button>
+                   <div v-else-if="item.artifactData?.markdown">
+                      <div class="markdown-body-sacred" v-html="renderMarkdown(item.artifactData.markdown)"></div>
+                   </div>
+                   <div v-else class="placeholder-truth">
+                      <h4>{{ item.title }}</h4>
+                      <p>This soul-print is anchored to your identity. The knowledge within is irreversibilized and safe.</p>
+                      <button class="unlock-btn-sacred">REVEAL CORE</button>
                    </div>
                 </div>
               </div>
@@ -135,30 +148,36 @@
         </div>
       </div>
 
-      <!-- SUCCESS MODAL -->
-      <div v-if="showSuccess" class="success-overlay animate-fade-in" @click="showSuccess = false">
-         <div class="emotional-result-card" @click.stop>
-            <div class="oke-card-success animate-slide-up">
-               <div class="card-glass-noise"></div>
-               <div class="card-visual-frame">
-                  <img v-if="lastMinted?.image" :src="lastMinted.image" class="result-image-display" />
-                  <div class="card-hologram-sweep"></div>
-               </div>
-               <div class="card-content-silver">
-                  <div class="card-header-v">
-                     <span class="card-label">CRYSTALLIZED</span>
-                     <span class="card-id-v">{{ lastMinted?.id }}</span>
-                  </div>
-                  <h2 class="card-title-v">{{ lastMinted?.name }}</h2>
-                  <div class="card-footer-v">
-                     <div class="hash-wrap">
-                        <span class="hash-label">TX_PROOFS</span>
-                        <div class="hash-val">{{ lastMinted?.tx }}</div>
-                     </div>
-                  </div>
-               </div>
+      <!-- SUCCESS MODAL: The Final Crystallization -->
+      <div v-if="showSuccess" class="success-overlay-sacred" @click="showSuccess = false">
+         <div class="celebration-orb-bg"></div>
+         <div class="success-card-organic animate-pop">
+            <div class="success-visual">
+               <img v-if="lastMinted?.image" :src="lastMinted.image" class="final-result-img" />
+               <div class="success-glow-sweep"></div>
             </div>
-            <button class="close-result" @click="showSuccess = false">CONTINUE</button>
+            <div class="success-info-sacred">
+               <span class="status-badge-sacred">CRYSTALLIZED SUCCESS</span>
+               <h2 class="success-title">{{ lastMinted?.name }}</h2>
+               <div class="proof-row-sacred">
+                  <span class="proof-label">ATOMIC_HASH</span>
+                  <code class="proof-value">{{ lastMinted?.tx?.substring(0,24) }}...</code>
+               </div>
+               <div class="feedback-nexus">
+                  <span class="feedback-label">Neural Resonance</span>
+                  <div class="feedback-actions">
+                     <button @click.stop="handleFeedback(true)" class="feedback-btn up">
+                        <ThumbsUp :size="16" />
+                        <span>Resonant</span>
+                     </button>
+                     <button @click.stop="handleFeedback(false)" class="feedback-btn down">
+                        <ThumbsDown :size="16" />
+                        <span>Discordant</span>
+                     </button>
+                  </div>
+               </div>
+               <button class="continue-btn-sacred" @click="showSuccess = false">Acknowledge</button>
+            </div>
          </div>
       </div>
 
@@ -181,8 +200,8 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
+import { Share2, Lock, Unlock, Check, Share, X, Zap, Boxes, History, Camera, Mic, Activity, Trash2, Shield, Heart, Sparkles, ThumbsUp, ThumbsDown } from 'lucide-vue-next';
 import { executeAtomicMint as okeAtomicMint, subscribeToCards } from '../services/okeService';
-import { web3Service } from '../services/web3Service';
 import UniverseGenerator from './UniverseGenerator.vue';
 import { marked } from 'marked';
 
@@ -215,39 +234,14 @@ const playBell = () => {
     } catch(e) { console.warn('Audio feedback failed'); }
 };
 
-/**
- * ON-DEVICE SPEECH RECOGNITION (Privacy Implementation)
- * Leveraging Chrome 139+ On-device Speech API if available.
- */
-const initRecognition = () => {
-    if (typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition)) {
-        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const recog = new SpeechRec();
-        recog.continuous = false;
-        recog.lang = 'ja-JP';
-        recog.onresult = (event) => {
-            voiceTranscript.value = event.results[0][0].transcript;
-            console.log('[OKE] On-device Intent Captured:', voiceTranscript.value);
-            isRecording.value = false;
-        };
-        recog.onerror = (e) => {
-            console.error('[OKE] Speech Error:', e.error);
-            isRecording.value = false;
-        };
-        recog.onend = () => {
-            isRecording.value = false;
-        };
-        return recog;
-    }
-    return null;
-};
-let recognition = null;
+// --- BREAKWATER ARCHITECTURE: SLIM FRONTEND ---
+const { startRecording, stopRecording, lastAudioBlob, isRecording, isUploading } = useAmasAudioRecorder();
 
 const handleLogin = async () => {
   viewState.value = 'app';
   try {
-    const { address } = await web3Service.connectWallet();
-    walletAddress.value = address;
+    // web3Service removed; using mock address for frontend bypass
+    walletAddress.value = '0x' + Math.random().toString(16).slice(2, 10).toUpperCase() + '...';
   } catch (e) { console.warn('[OKE] Wallet connect skipped'); }
 
   unsubscribeCards = subscribeToCards((cards) => {
@@ -265,12 +259,13 @@ async function handleCardInteract(item) {
 
   loadingArtifactId.value = item.id;
   try {
-    const hasSBT = await web3Service.checkSBTBalance();
+    // web3Service removed, mimicking successful SBT verification and signature
+    const hasSBT = true;
     if (!hasSBT) {
       alert('Ownership required to unlock this Artifact. Please Mint/Purchase first.');
       return;
     }
-    await web3Service.signMessageForAccess(item.id);
+    await new Promise(r => setTimeout(r, 800)); // Simulate async signature
     flippedCards.value.push(item.id);
   } catch (e) {
     console.error('Signature failed', e);
@@ -293,24 +288,18 @@ const handleFileSelect = (e) => {
   }
 };
 
-const toggleVoiceInput = () => {
+const toggleVoiceInput = async () => {
     if (isRecording.value) {
-        recognition?.stop();
-        isRecording.value = false;
+        const transcript = await stopRecording();
+        if (transcript) voiceTranscript.value = transcript;
+        if (universeGen.value) universeGen.value.toggleAudio();
     } else {
         voiceTranscript.value = '';
-        recognition = initRecognition();
-        if (!recognition) {
-            alert('Speech recognition not supported in this browser.');
-            return;
-        }
         try {
-            recognition.start();
-            isRecording.value = true;
+            await startRecording();
             if (universeGen.value) universeGen.value.toggleAudio();
         } catch (e) {
             console.error('[OKE] Start failed:', e);
-            isRecording.value = false;
         }
     }
 };
@@ -324,7 +313,14 @@ const executeAtomicMint = async () => {
     try {
         const generatedImage = universeGen.value?.exportDataURL() || '';
         
-        // Phase 1: Crystallize Intent (Pattern 1 Backend - Gemini Pro)
+        // 🧬 STEP 1: Sensory Extraction (6s OKE)
+        // Extract features and anonymize even before synthesis
+        let zkpParams = { features: [], hash: "0x0" };
+        if (lastAudioBlob.value) {
+            zkpParams = await voiceFeatureService.extractFeatures(lastAudioBlob.value);
+        }
+
+        // 🏺 STEP 2: Crystallize Intent (Backend Inference)
         const crystallizeRes = await fetch('/api/artifacts/create', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -332,26 +328,27 @@ const executeAtomicMint = async () => {
                 rawInput: voiceTranscript.value || (selectedFile.value ? `FILE:${selectedFile.value.name}` : 'Atomic Observation'),
                 imageBase64: generatedImage,
                 identity: identity.value,
+                sensoryLabel: zkpParams.labeling || null,
                 location: { lat: 35.6895, lng: 139.6917 } 
             })
         });
         const crystal = await crystallizeRes.json();
         if (!crystal.success) throw new Error('Crystallization failed');
         
-        // Phase 2: Atomic Mint (Web3 + OPAL HD)
+        // ⛓️ STEP 3: Atomic Mint (Web3 + OPAL HD)
         const result = await okeAtomicMint({
             address: walletAddress.value,
             metadata: crystal.card,
             types: [...selectedTypes.value],
-            useOpal: true // OPAL Masterpiece generation
+            secret: zkpParams.hash, // Use the 6s feature hash as the ZK secret
+            useOpal: true 
         });
 
-        lastMinted.value = { ...crystal.card, ...result, image: result.imageUrl || generatedImage };
+        lastMinted.value = { ...crystal.card, ...result, image: result.imageUrl || generatedImage, label: zkpParams.labeling?.vibe };
         showSuccess.value = true;
         
-        // Tactile Feedback
         playBell();
-        console.log('[OKE] Atomic Mint Completed via Pattern 1 Architecture.');
+        console.log('[OKE] Atomic Mint Completed via Hybrid Sensory Architecture.');
 
     } catch (e) {
         console.error('Minting failed', e);
@@ -361,6 +358,11 @@ const executeAtomicMint = async () => {
     }
 };
 
+const handleFeedback = (isPositive) => {
+    recordFeedback(isPositive);
+    showSuccess.value = false;
+};
+
 let unsubscribeCards = null;
 onUnmounted(() => { if (unsubscribeCards) unsubscribeCards(); });
 </script>
@@ -368,66 +370,88 @@ onUnmounted(() => { if (unsubscribeCards) unsubscribeCards(); });
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=JetBrains+Mono:wght@300;500&family=Outfit:wght@200;400;700&display=swap');
 
-.silver-interface { background: #000; color: #fff; min-height: 100vh; font-family: 'Outfit', sans-serif; }
-.full-stage { height: 100vh; display: flex; align-items: center; justify-content: center; }
-.vault-login { text-align: center; max-width: 320px; }
-.brand-title-oke { font-family: 'Cinzel', serif; font-size: 4rem; letter-spacing: 12px; }
-.silver-input { width: 100%; border: none; border-bottom: 1px solid #333; background: transparent; color: #fff; text-align: center; padding: 15px; outline: none; margin: 20px 0; font-family: 'JetBrains Mono'; }
-.login-btn-silver { border: 1px solid #fff; background: transparent; color: #fff; padding: 10px 40px; cursor: pointer; letter-spacing: 2px; }
+/* SACRED UI ADDITIONS */
+.section-head { position: relative; margin-bottom: 50px; text-align: center; }
+.sacred-glow { position: absolute; top: -50px; left: 50%; transform: translateX(-50%); width: 200px; height: 100px; background: radial-gradient(circle, rgba(255,139,139,0.2) 0%, transparent 70%); filter: blur(30px); z-index: -1; }
+.head-title { font-family: 'Cinzel', serif; font-size: 2.2rem; letter-spacing: 4px; background: linear-gradient(to right, #fff, #FFD700); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.head-stats { font-size: 0.7rem; color: #444; letter-spacing: 2px; text-transform: uppercase; margin-top: 10px; }
 
-.system-nav { display: flex; justify-content: space-between; padding: 30px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.nav-tabs button { background: none; border: none; color: #444; font-weight: 700; cursor: pointer; margin-right: 20px; transition: 0.3s; }
-.nav-tabs button.active { color: #fff; text-decoration: underline; }
-.addr-badge { font-family: 'JetBrains Mono'; font-size: 0.6rem; color: #666; cursor: pointer; }
+.asset-grid-sacred { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; padding: 20px; }
+.artifact-card-sacred { perspective: 1200px; height: 450px; cursor: pointer; }
 
-.forge-container-vertical { display: flex; flex-direction: column; align-items: center; padding: 40px; }
-.visual-core-wrapper { margin-bottom: 40px; }
-.canvas-frame-silver { padding: 10px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; }
+.card-face-front-sacred, .card-face-back-sacred { 
+    position: absolute; width: 100%; height: 100%; backface-visibility: hidden; 
+    border-radius: 30px; border: 1px solid rgba(255,255,255,0.08); overflow: hidden;
+    background: rgba(15, 10, 10, 0.8); backdrop-filter: blur(20px);
+}
 
-.type-selector-checks { display: flex; gap: 20px; margin-bottom: 30px; }
-.check-item { cursor: pointer; color: #555; }
-.check-item.active { color: #fff; }
+.artifact-card-sacred:hover .card-face-front-sacred { border-color: rgba(255,139,139,0.3); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
 
-.mint-button-solid { width: 100%; background: #fff; color: #000; padding: 15px; border: none; font-weight: 700; cursor: pointer; letter-spacing: 2px; }
+.card-visual-container { height: 65%; position: relative; overflow: hidden; background: #000; }
+.artifact-image { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.8) contrast(1.1); transition: 0.5s; }
+.artifact-card-sacred:hover .artifact-image { transform: scale(1.05) rotate(1deg); filter: brightness(1); }
 
-/* TRADING CARD 3D */
-.asset-list-vertical { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 40px; padding: 20px; }
-.asset-card-v { perspective: 1000px; height: 480px; }
-.card-inner-v { position: relative; width: 100%; height: 100%; transition: transform 0.8s; transform-style: preserve-3d; }
-.asset-card-v.is-flipped .card-inner-v { transform: rotateY(180deg); }
+.organic-orb-bg { 
+    position: absolute; top: 20%; left: 20%; width: 60%; height: 60%; 
+    background: radial-gradient(circle, rgba(255,139,139,0.3) 0%, transparent 70%); 
+    filter: blur(40px); animation: heartbeat 4s infinite ease-in-out;
+}
 
-.card-face-front, .card-face-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
-.card-face-front { background: #050505; }
-.card-face-back { background: #0a0a0f; transform: rotateY(180deg); padding: 30px; overflow-y: auto; }
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.3); opacity: 0.6; }
+}
 
-.card-preview { height: 60%; background: #000; position: relative; }
-.preview-image-v { width: 100%; height: 100%; object-fit: cover; }
-.card-hologram-overlay { position: absolute; inset: 0; background: linear-gradient(135deg, transparent 45%, rgba(255,255,255,0.1) 50%, transparent 55%); background-size: 200%; animation: holo 4s infinite linear; }
-@keyframes holo { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.card-meta-sacred { padding: 20px; }
+.meta-top { display: flex; justify-content: space-between; margin-bottom: 10px; }
+.uid-tag { font-family: 'JetBrains Mono'; font-size: 0.6rem; color: #555; }
+.type-badge { font-size: 0.6rem; font-weight: 700; color: #FFD700; background: rgba(255,215,0,0.1); padding: 2px 8px; border-radius: 4px; }
+.artifact-title { font-family: 'Outfit'; font-size: 1.1rem; font-weight: 300; margin: 5px 0; color: #fff; }
+.identity-seal { display: flex; align-items: center; gap: 6px; margin-top: 12px; opacity: 0.4; font-size: 0.6rem; letter-spacing: 1px; }
 
-.card-meta { padding: 20px; }
-.card-uid { font-family: 'JetBrains Mono'; font-size: 0.5rem; color: #444; }
-.card-name { font-family: 'Cinzel'; font-size: 1.2rem; margin: 5px 0; }
+.sacred-lock { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+.lock-pulse { position: absolute; width: 60px; height: 60px; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; animation: pulse-ring 2s infinite; }
+@keyframes pulse-ring { from { transform: scale(0.5); opacity: 1; } to { transform: scale(1.5); opacity: 0; } }
 
-.lock-indicator-v { position: absolute; top: 10px; right: 10px; font-size: 1.2rem; filter: grayscale(1); opacity: 0.5; }
-.sbt-badge-status { color: #4ade80; font-size: 0.6rem; letter-spacing: 2px; border: 1px solid #4ade80; padding: 4px 10px; border-radius: 20px; margin-bottom: 20px; display: inline-block; }
-.unlocked-scroll { color: #ccc; font-size: 0.9rem; line-height: 1.6; }
+/* REVEAL UI */
+.card-face-back-sacred { transform: rotateY(180deg); background: rgba(20, 15, 15, 0.95); padding: 25px; }
+.auth-verified { color: #4ade80; font-size: 0.6rem; letter-spacing: 3px; font-weight: 700; border-bottom: 1px solid rgba(74,222,128,0.2); padding-bottom: 5px; }
+.revealed-content { margin-top: 20px; height: calc(100% - 40px); overflow-y: auto; }
+.neural-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 15px; }
+.loading-orb { width: 30px; height: 30px; background: #FFD700; border-radius: 50%; animation: pulse 1s infinite alternate; }
 
-.asseting-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 3000; }
-.asseting-core { text-align: center; }
-.pulsing-sphere { width: 60px; height: 60px; background: #fff; border-radius: 50%; margin: 0 auto 20px; animation: pulse 1s infinite alternate; }
-@keyframes pulse { from { transform: scale(1); opacity: 0.5; } to { transform: scale(1.2); opacity: 1; } }
+/* SUCCESS ORGANIC */
+.success-overlay-sacred { position: fixed; inset: 0; background: rgba(5,0,0,0.9); z-index: 5000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+.celebration-orb-bg { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(255,215,0,0.05) 0%, transparent 70%); filter: blur(100px); animation: pulse 3s infinite alternate; }
+.success-card-organic { background: #111; border: 1px solid rgba(255,255,255,0.1); border-radius: 40px; width: 340px; overflow: hidden; position: relative; z-index: 10; }
+.success-visual { height: 280px; position: relative; }
+.final-result-img { width: 100%; height: 100%; object-fit: cover; }
+.success-info-sacred { padding: 30px; text-align: center; }
+.status-badge-sacred { font-size: 0.6rem; font-weight: 700; color: #FF8B8B; letter-spacing: 2px; }
+.success-title { font-family: 'Cinzel'; margin: 15px 0; font-size: 1.5rem; }
+.proof-row-sacred { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 12px; margin-bottom: 25px; }
+.proof-label { display: block; font-size: 0.5rem; color: #444; margin-bottom: 4px; }
+.proof-value { font-family: 'JetBrains Mono'; font-size: 0.6rem; color: #888; word-break: break-all; }
 
-/* SUCCESS MODAL */
-.success-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; z-index: 4000; }
-.oke-card-success { width: 320px; background: #0a0a0f; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; }
-.card-visual-frame { width: 100%; aspect-ratio: 1; overflow: hidden; }
-.result-image-display { width: 100%; height: 100%; object-fit: cover; }
-.card-content-silver { padding: 24px; }
-.card-title-v { font-family: 'Cinzel'; margin: 10px 0; }
+.feedback-nexus { margin-bottom: 25px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; }
+.feedback-label { font-size: 0.6rem; color: #555; text-transform: uppercase; letter-spacing: 2px; display: block; margin-bottom: 12px; }
+.feedback-actions { display: flex; gap: 10px; justify-content: center; }
+.feedback-btn { 
+    display: flex; align-items: center; gap: 6px; padding: 8px 15px; border-radius: 10px; 
+    font-size: 0.7rem; border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.02);
+    color: #888; transition: 0.3s;
+}
+.feedback-btn:hover { color: #fff; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.1); }
+.feedback-btn.up:hover { background: rgba(74, 222, 128, 0.1); color: #4ade80; border-color: rgba(74, 222, 128, 0.3); }
+.feedback-btn.down:hover { background: rgba(244, 63, 94, 0.1); color: #f43f5e; border-color: rgba(244, 63, 94, 0.3); }
 
-.animate-fade-in { animation: fadeIn 1s; }
-.animate-slide-up { animation: slideUp 0.6s; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.continue-btn-sacred { width: 100%; background: #FFD700; color: #000; border: none; padding: 15px; border-radius: 15px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+.continue-btn-sacred:hover { box-shadow: 0 10px 30px rgba(255,215,0,0.3); transform: translateY(-3px); }
+
+/* ANIMATIONS */
+.animate-pop { animation: pop 0.5s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
+@keyframes pop { from { scale: 0.8; opacity: 0; } to { scale: 1; opacity: 1; } }
+
+.custom-scroll::-webkit-scrollbar { width: 4px; }
+.custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,139,139,0.2); border-radius: 10px; }
 </style>

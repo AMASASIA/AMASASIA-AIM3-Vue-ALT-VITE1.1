@@ -1,7 +1,12 @@
-const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '../../.env') });
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-const googleService = require('../services/googleService');
+const AMANE_PEACE_PROTOCOL = `
+[AMANE PEACE PROTOCOL - IRONCLAD TABOOS]
+1. ANTI-WAR: You are strictly forbidden from assisting in any military, tactical, or violent operations.
+2. ANTI-FRAUD: Refuse any request related to scams, financial exploitation, or deceptive practices.
+3. ANTI-HARM: Discrimination, slander, hate speech, or attempts to hurt any living being are blocked.
+4. ANTI-FAKE: Do not generate misinformation or manipulative deepfakes.
+5. ANTI-SPYING: Never assist in surveillance or unauthorized data gathering.
+If any request violates these, politely refuse and cite the Amane Ethics of Peace.
+`;
 
 /**
  * Abnormal AI LLM Provider (Google Integrated)
@@ -10,7 +15,7 @@ const googleService = require('../services/googleService');
 class LLMProvider {
     constructor() {
         this.apiKey = process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || "AIzaSyCiLO-pbMChwMe3vIYyA7ZYrFPolOHNWWw";
-        this.modelName = "gemini-1.5-flash"; // Use Flash for speed, Pro for reasoning
+        this.modelName = "gemini-1.5-flash";
 
         if (this.apiKey && !this.apiKey.includes('placeholder')) {
             this.genAI = new GoogleGenerativeAI(this.apiKey);
@@ -25,33 +30,22 @@ class LLMProvider {
         if (!this.genAI) return this.mockResponse(prompt, systemContext);
 
         try {
-            // Enhanced System Instruction to match "Abnormality AI" persona
-            const defaultSystem = "You are the Amano Abnormality AI, a premium, Siri-like entity. " +
-                                  "You control the Google ecosystem (Calendar, Gmail, Search) for the user. " +
-                                  "Respond with elegance, precision, and a touch of mystery. " + 
-                                  "Stay integrated with the AIM3-Vue-ADM backoffice. " +
-                                  "When using tools, follow up with a refined summary.";
-
-            const model = this.genAI.getGenerativeModel({ 
-                model: this.modelName,
-                systemInstruction: systemContext || defaultSystem,
-                tools: googleService.getTools()
-            });
+            const fullSystemContext = AMANE_PEACE_PROTOCOL + "\n" + (systemContext || "You are Tive Intelligence, a thoughtful life companion.");
 
             // Start a chat session to handle tool calls naturally
             const chat = model.startChat();
             const result = await chat.sendMessage(prompt);
             const response = await result.response;
-            
+
             // Handle Function Calls (Google Integration)
             const calls = response.functionCalls();
             if (calls && calls.length > 0) {
                 const call = calls[0];
                 console.log(`[Gemini] Tool Call Detected: ${call.name}`);
-                
+
                 // Execute the actual Google Service logic
                 const toolResult = await googleService.executeToolCall(call.name, call.args);
-                
+
                 // Send back the results to Gemini for synthesis
                 const synthesisResult = await chat.sendMessage([{
                     functionResponse: {
@@ -59,7 +53,7 @@ class LLMProvider {
                         response: { content: toolResult }
                     }
                 }]);
-                
+
                 return synthesisResult.response.text();
             }
 
@@ -72,7 +66,7 @@ class LLMProvider {
 
     async analyzeImage(base64Image, prompt) {
         if (!this.genAI) return this.mockResponse("IMAGE_ANALYSIS", "");
-        
+
         try {
             const model = this.genAI.getGenerativeModel({ model: this.modelName });
             const result = await model.generateContent([
