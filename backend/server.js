@@ -38,6 +38,16 @@ app.use('/consensus', require('./api/consensus'));
 
 app.use('/opal', require('./api/opal_gateway'));
 app.use('/deployment', require('./api/deployment_gateway'));
+app.get('/core-status', async (req, res) => {
+  try {
+    const response = await fetch('http://localhost:8000/');
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    res.status(502).json({ error: 'Hyper Core connection failed', message: err.message });
+  }
+});
+
 app.use('/api', require('./api/intent'));
 app.use('/api/finance', require('./api/finance'));
 app.use('/api/oke', require('./api/okeGateway'));
