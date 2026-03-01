@@ -153,7 +153,7 @@ class SelfImprover:
 # ==========================================
 # FastAPI サーバー設定 & 超並列パイプライン
 # ==========================================
-app = FastAPI(title="Tive◎AI Hyper Core", version="2.0.0-PEACE")
+app = FastAPI(title="Tive◎AI | AMAS Core OS", version="2.0.0-PEACE")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 @app.middleware("http")
@@ -290,7 +290,7 @@ async def chat_endpoint(request: ChatRequest):
 
 @app.get("/")
 async def root():
-    return {"status": "active", "engine": "Tive◎AI Hyper Core", "compliance": "Peace Protocols Active"}
+    return {"status": "active", "engine": "Tive◎AI | AMAS Core OS", "compliance": "Amane Protocols Active"}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
